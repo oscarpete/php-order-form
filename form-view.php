@@ -1,106 +1,68 @@
 <?php
 
-$emailError = $streetErr = $streetnumberError = $cityError = $zipcodeError = "";
-$email = $street = $streetnumber = $city = $zipcode = "";
+// form handler
+function validateFeedbackForm($arr)
+{
+    extract($arr);
 
-//function validEmail(){
-//    if (isset($_POST['submit'])){
-//        $email = $_POST['email'];
-//        $regex = '/^[a-zA-Z0-9._-]+@[a-zA-Z0-9-]+\.[a-zA-Z.]{2,5}$/';
-//
-//        if (preg_match($regex, $email)){
-//            echo "valid email";
-//        } else{
-//            echo "invalid email";
-//        }
-//    }
-//}
-
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    /// email //
-
-    if (!empty($correo)) {
-        $correo = $_POST["email"];
-        $emailError = "Email is required arriba";
-        echo "invalido";
+    if(!isset( $email, $street, $streetnumber, $city, $zipcode)) return;
 
 
+    if(!preg_match("/^[a-zA-Z0-9._-]+@[a-zA-Z0-9-]+\.[a-zA-Z.]{2,5}$/", $email)) {
+        return "Please enter a valid Email address";
+    }
+    if(!$street) {
+        return "Please enter your Street";
+    }
+    if(!is_numeric($streetnumber)) {
+        return "Fill only numbers in your street number";
+    }
+    //if(!$subject) {
+    //  $subject = "Contact from website";}
+    if(!$city) {
+        return "Please enter your City";
+    }
 
-        } else{
-        $correo = $_POST["email"];
-        $regex = '/^[a-zA-Z0-9._-]+@[a-zA-Z0-9-]+\.[a-zA-Z.]{2,5}$/';
+    if(!is_numeric($zipcode)) {
+        return "We need only Numbers as zip code";
+    }
 
-        if (preg_match($regex, $correo)){
-            $regex = '/^[a-zA-Z0-9._-]+@[a-zA-Z0-9-]+\.[a-zA-Z.]{2,5}$/';
-            $email = test_input($_POST["email"]);
-            echo "valid email";
-        } else {
-            $emailError = "Email is required";
-            echo "here is an invalid email";
+
+    $aProduct = $_POST['products'];
+    if(empty($aProduct)) // better use isset
+    {
+        return("You didn't select any product.");
+    }
+    else
+    {
+        $N = count($products);
+
+        echo("You selected $N product(s): ");
+        for($i=0; $i < $N; $i++)  // here you have to use AS but for foreach
+        {
+            //echo($aProduct[$i] . " "); //use key because products are array
         }
+    }
 
-        }
-
-
-
-
-
-
-//        $emailErr = "Email is required";
-//    } else {
-//        $email = test_input($_POST["email"]);
+//    if(!$message) {
+//        return "Please enter your comment in the Message box";
 //    }
 
-    ///// email   ////
-
-    if (empty($_POST["street"])) {
-        $streetErr = "Street is required";
-    } else {
-        $street = test_input($_POST["street"]);
-    }
-
-
-    if (empty($calle)) {
-        $calle = ($_POST["streetnumber"]);
-
-        if (is_numeric($calle)){
-            $streetnumber = test_input($_POST["streetnumber"]);
-        } else{
-            $streetnumberError = "Street Number must be a number";
-        }
-
-    }
-
-    if (empty($_POST["city"])) {
-        $cityError = "City is required";
-    } else {
-        $city = test_input($_POST["city"]);
-    }
-
-
-    if (empty($postal)) {
-        $postal = ($_POST["zipcode"]);
-
-        if (is_numeric($postal)){
-            $zipcode = test_input($_POST["zipcode"]);
-        } else{
-            $zipcodeError = "Zipcode  must be a number";
-        }
-
-    }
-
-
-
-
-    ////////////////
+    // send email and redirect
+//    $to = "oscar@pandime.com";
+//    $headers = "From: form@becodelocal.com" . "\r\n";
+//    mail($to, $street, $streetnumber, $city, $zipcode);
+    //header("Location: http://www.example.com/thankyou.html");
+//    header("Location: http://becode.local/index.php");
+//    exit;
 }
 
-function test_input($data) {
-    $data = trim($data);
-    $data = stripslashes($data);
-    $data = htmlspecialchars($data);
-    return $data;
+// execution starts here
+if(isset($_POST['submit'])) {
+    // call form handler
+    $errorMsg = validateFeedbackForm($_POST);
 }
+
 
 
 ?>
@@ -122,26 +84,19 @@ function test_input($data) {
     <title>Order food & drinks</title>
 </head>
 <body>
-<!--  alert after -->
 
-
-
-<?php if (isset($_POST['form_submitted'])): ?>
-
-    <h2>Thank You! Order on the way</h2>
-    <p>Go <a href="/index.php">back</a> to the form</p>
-
-<?php else: ?>
-
-
-
-
-
-<!--  alert after -->
-
-
-
-
+<div class="alert alert-primary align-text-middle" role="alert" >
+    <?php
+//    if (isset($submit)) {
+//        if (isset($errorMsg)){
+//            echo $errorMsg;
+//        }
+//    }
+    if(isset($errorMsg) && $errorMsg) {
+        echo "<p class='error'>* ",htmlspecialchars($errorMsg),"</p>\n\n";
+    }
+    ?>
+</div>
 
 <div class="container">
     <h1>Order food in restaurant "the Personal Ham Processors"</h1>
@@ -155,16 +110,20 @@ function test_input($data) {
             </li>
         </ul>
     </nav>
-    <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
+    <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>" accept-charset="UTF-8">
+
+        <?PHP
+        if(isset($errorMsg) && $errorMsg) {
+            echo "<p class='error'>* ",htmlspecialchars($errorMsg),"</p>\n\n";
+        }
+        ?>
+
         <div class="form-row">
+
             <div class="form-group col-md-6">
-                <label for="email">E-mail:</label>
+                <label for="email">E-mail:*</label>
 
-                <span class="error">* <?php echo $emailError;?></span>
-
-                <?php
-                echo '<input type="text" value="'. $email .'" id="email" name="email" class="form-control"/>';
-                ?>
+                 <input type="email" name="email" value="<?PHP  echo isset($_SESSION['email'])?$_SESSION['email']:""; ?>" id="email"  class="form-control"/>
 
             </div>
             <div></div>
@@ -175,38 +134,38 @@ function test_input($data) {
 
             <div class="form-row">
                 <div class="form-group col-md-6">
-                    <label for="street">Street:</label>
+                    <label for="street">Street:*</label>
 
-                    <span class="error">* <?php echo $streetErr;?></span>
-                    <?php
-                        echo '<input type="text" value="'.$street.'" name="street" id="street" class="form-control">';
-                    ?>
+
+                    <input type="text" value="<?PHP  echo isset($_SESSION['street'])?$_SESSION['street']:""; ?>" name="street" id="street" class="form-control">
+
+
+
                 </div>
                 <div class="form-group col-md-6">
                     <label for="streetnumber">Street number:</label>
 
-                    <span class="error">* <?php echo $streetnumberError;?></span>
-                    <?php
-                    echo '<input type="text" value="'.$streetnumber.'" id="streetnumber" name="streetnumber" class="form-control">';
-                    ?>
+
+                    <input type="text" name="streetnumber" value="<?PHP echo isset($_SESSION['streetnumber'])?$_SESSION['streetnumber']:""; ?>" id="streetnumber"  class="form-control">
+
+
                 </div>
             </div>
             <div class="form-row">
                 <div class="form-group col-md-6">
                     <label for="city">City:</label>
 
-                    <span class="error">* <?php echo $cityError;?></span>
-                    <?php
-                    echo '<input type="text" value="'.$city.'" id="city" name="city" class="form-control">';
-                    ?>
+
+                     <input type="text" value="<?PHP echo isset($_SESSION['city'])?$_SESSION['city']:""; ?>" id="city" name="city" class="form-control">
+
+
                 </div>
                 <div class="form-group col-md-6">
                     <label for="zipcode">Zipcode</label>
 
-                    <span class="error">* <?php echo $zipcodeError;?></span>
-                    <?php
-                        echo '<input type="text" value="'.$zipcode.'" id="zipcode" name="zipcode" class="form-control">';
-                    ?>
+                     <input type="text" value="<?PHP echo isset($_SESSION['zipcode'])?$_SESSION['zipcode']:""; ?>" id="zipcode" name="zipcode" class="form-control">
+
+
                 </div>
             </div>
         </fieldset>
@@ -215,7 +174,7 @@ function test_input($data) {
             <legend>Products</legend>
             <?php foreach ($products AS $i => $product): ?>
                 <label>
-                    <input type="checkbox" value="1" name="products[<?php echo $i ?>]"/> <?php echo $product['name'] ?> -
+                    <input type="checkbox" value="1" name="products[<?php echo $i ?>]"/> <?php echo $product['name'] ?> - <!-- this are the keys -->
                     &euro; <?php echo number_format($product['price'], 2) ?></label><br />
             <?php endforeach; ?>
         </fieldset>
@@ -224,7 +183,7 @@ function test_input($data) {
             <input type="checkbox" name="express_delivery" value="5" /> 
             Express delivery (+ 5 EUR) 
         </label>
-        <input type="hidden" name="form_submitted" value="1" />
+
         <button type="submit" name="submit" class="btn btn-primary">Order!</button>
     </form>
 
@@ -240,16 +199,23 @@ function test_input($data) {
 <?php
 echo "<h2>Your Input:</h2>";
 
-echo $email;
-echo "<br>";
-echo $street;
-echo "<br>";
-echo $streetnumber;
-echo "<br>";
-echo $city;
-echo "<br>";
-echo $zipcode;
+
+//echo htmlspecialchars($_POST['street']);
+//echo "<br>";
+//echo htmlspecialchars($_POST['streetnumber']);
+//echo "<br>";
+//echo htmlspecialchars($_POST['city']);
+//echo "<br>";
+//echo htmlspecialchars($_POST['zipcode']);
+//echo "<br>";
+//echo ($_POST[$aProduct]);
+//echo ($products['products']);
+var_dump($_POST['products']);
+
+
+//echo ($aProduct);
+//
 ?>
-<?php endif; ?>
+
 </body>
 </html>
